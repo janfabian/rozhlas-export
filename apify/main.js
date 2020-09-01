@@ -11,10 +11,11 @@ Apify.main(async () => {
   console.log({ categories });
 
   const requestList = await Apify.openRequestList(
-    "rozhlas-categories",
+    null,
     categories.map((category) => {
       const u = new URL(url);
-      u.searchParams.append("porad", category);
+      u.searchParams.append("porad[]", category);
+
       return u.toString();
     })
   );
@@ -27,21 +28,19 @@ Apify.main(async () => {
     handlePageTimeoutSecs: 30,
     maxRequestsPerCrawl: 10,
     handlePageFunction: async ({ request, $ }) => {
-      log.debug(`Processing ${request.url}...`);
+      console.log(request.url);
 
       const episodeUrls = [];
       $("#box-results h3 a").each((index, el) => {
         episodeUrls.push({
-          url: el.href,
+          url: $(el).prop("href"),
         });
       });
 
-      log.debug(episodeUrls);
+      console.log(episodeUrls);
 
       const input = {
-        startUrls: episodeUrls.map((url) => {
-          url;
-        }),
+        startUrls: episodeUrls,
         pageFunction,
       };
 
