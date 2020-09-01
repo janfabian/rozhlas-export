@@ -1,0 +1,12 @@
+{
+  "name": "actor-quick-start",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "apify": "^0.20.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "node main.js"
+  }
+}

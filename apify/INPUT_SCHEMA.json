@@ -1,0 +1,18 @@
+{
+  "title": "Input schema for the rozhlas-archiv actor.",
+  "description": "",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "categories": {
+      "title": "categories",
+      "type": "array",
+      "description": "rozhlas category names",
+      "editor": "json",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "categories"
+  ]
+}
