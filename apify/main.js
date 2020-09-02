@@ -33,7 +33,6 @@ Apify.main(async () => {
     maxRequestsPerCrawl: 5000,
     handlePageFunction: async ({ request, $ }) => {
       console.log(request.url);
-      console.log(request.userData);
       const { isCategory, isEpisode } = request.userData;
 
       if (isCategory) {
@@ -55,9 +54,14 @@ Apify.main(async () => {
       if (isEpisode) {
         const part = request.url.split("=")[1];
         const fileUrl = $(`#file-serial-player [part=${part}] a`).prop("href");
-        const [authorNames, name] = $("h1").text().split(":");
+        let [authors, name] = $("h1").text().split(":");
 
-        const authors = authorNames.split(" a ").map((author) => author.trim());
+        if (!name) {
+          name = authors;
+          authors = [];
+        }
+
+        authors = authors.split(" a ").map((author) => author.trim());
 
         await Apify.pushData({
           url: request.url,
