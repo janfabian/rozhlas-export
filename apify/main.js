@@ -1,27 +1,31 @@
 const Apify = require("apify");
 const { log } = Apify.utils;
 
-const pageFunction = require("./pageFunction");
-
-const url =
-  "https://hledani.rozhlas.cz/iradio/?query=&reader=&offset=0&dateLimit=TL_1D";
+const url = "https://hledani.rozhlas.cz/iradio/?query=&reader=&offset=0";
 
 Apify.main(async () => {
-  const { categories } = await Apify.getInput();
-  console.log({ categories });
+  const { categories, last24hours } = await Apify.getInput();
+  console.log({ categories, last24hours });
 
-  const requestList = await Apify.openRequestList(
-    null,
+  const requestQueue = await Apify.openRequestQueue();
+  await Promise.all(
     categories.map((category) => {
       const u = new URL(url);
       u.searchParams.append("porad[]", category);
 
-      return u.toString();
+      if (last24hours) {
+        u.searchParams.append("dateLimit", "TL_1D");
+      }
+
+      return requestQueue.addRequest({
+        url: u.toString(),
+        userData: { isCategory: true },
+      });
     })
   );
 
   const crawler = new Apify.CheerioCrawler({
-    requestList,
+    requestQueue,
     minConcurrency: 10,
     maxConcurrency: 50,
     maxRequestRetries: 1,
@@ -29,22 +33,35 @@ Apify.main(async () => {
     maxRequestsPerCrawl: 10,
     handlePageFunction: async ({ request, $ }) => {
       console.log(request.url);
+      console.log(request.userData);
+      const { isCategory, isEpisode } = request.userData;
 
-      const episodeUrls = [];
-      $("#box-results h3 a").each((index, el) => {
-        episodeUrls.push({
-          url: $(el).prop("href"),
+      if (isCategory) {
+        const episodeUrls = [];
+        $("#box-results h3 a").each((index, el) => {
+          episodeUrls.push($(el).prop("href"));
         });
-      });
 
-      console.log(episodeUrls);
+        await Promise.all(
+          episodeUrls.map((url) =>
+            requestQueue.addRequest({
+              url,
+              userData: { isEpisode: true },
+            })
+          )
+        );
+      }
 
-      const input = {
-        startUrls: episodeUrls,
-        pageFunction,
-      };
+      if (isEpisode) {
+        const part = request.url.split("=")[1];
+        const partUrl = $(`#file-serial-player [part=${part}] a`).prop("href");
 
-      await Apify.call("apify/web-scraper", input);
+        await Apify.pushData({
+          url: request.url,
+          part,
+          partUrl,
+        });
+      }
     },
 
     handleFailedRequestFunction: async ({ request }) => {
