@@ -59,7 +59,7 @@ Apify.main(async () => {
         if (part) {
           fileUrl = $(`#file-serial-player [part=${part}] a`).prop("href");
         } else {
-          fileUrl = $(`#file- .selected a`).prop("href");
+          fileUrl = $(`#file- .hidden a`).prop("href");
         }
 
         let [authors, name] = $("h1").text().split(":");
