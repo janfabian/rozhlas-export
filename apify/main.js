@@ -30,7 +30,7 @@ Apify.main(async () => {
     maxConcurrency: 50,
     maxRequestRetries: 1,
     handlePageTimeoutSecs: 30,
-    maxRequestsPerCrawl: 10,
+    maxRequestsPerCrawl: 5000,
     handlePageFunction: async ({ request, $ }) => {
       console.log(request.url);
       console.log(request.userData);
