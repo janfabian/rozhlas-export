@@ -58,7 +58,7 @@ Apify.main(async () => {
 
         if (!name) {
           name = authors;
-          authors = [];
+          authors = "";
         }
 
         authors = authors.split(" a ").map((author) => author.trim());
