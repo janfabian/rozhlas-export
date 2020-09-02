@@ -19,7 +19,7 @@ Apify.main(async () => {
 
       return requestQueue.addRequest({
         url: u.toString(),
-        userData: { isCategory: true },
+        userData: { isCategory: true, category },
       });
     })
   );
@@ -33,7 +33,7 @@ Apify.main(async () => {
     maxRequestsPerCrawl: 5000,
     handlePageFunction: async ({ request, $ }) => {
       console.log(request.url);
-      const { isCategory, isEpisode } = request.userData;
+      const { isCategory, isEpisode, category } = request.userData;
 
       if (isCategory) {
         const episodeUrls = [];
@@ -45,7 +45,7 @@ Apify.main(async () => {
           episodeUrls.map((url) =>
             requestQueue.addRequest({
               url,
-              userData: { isEpisode: true },
+              userData: { isEpisode: true, category },
               keepUrlFragment: true,
             })
           )
@@ -77,6 +77,7 @@ Apify.main(async () => {
           partUrl: fileUrl,
           name: name.trim(),
           authors,
+          category,
         });
       }
     },

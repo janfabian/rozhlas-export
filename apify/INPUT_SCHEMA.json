@@ -9,13 +9,29 @@
       "type": "array",
       "description": "rozhlas category names",
       "editor": "json",
-      "uniqueItems": true
+      "uniqueItems": true,
+      "example": [
+        "Četba na pokračování",
+        "Dopolední četba",
+        "Pokračování za chvilku",
+        "Hajaja",
+        "Hra na neděli",
+        "Rozhlasová hra",
+        "Hra na sobotu",
+        "Hra pro pamětníky",
+        "Svět poezie",
+        "Povídka",
+        "Sobotní drama",
+        "BáSnění",
+        "Pokračování za pět minut"
+      ]
     },
     "last24hours": {
       "title": "last24hours",
       "type": "boolean",
       "description": "last24hours",
-      "editor": "checkbox"
+      "editor": "checkbox",
+      "example": true
     }
   },
   "required": [
