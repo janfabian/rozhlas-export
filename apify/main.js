@@ -46,6 +46,7 @@ Apify.main(async () => {
             requestQueue.addRequest({
               url,
               userData: { isEpisode: true },
+              keepUrlFragment: true,
             })
           )
         );
