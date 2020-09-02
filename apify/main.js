@@ -54,12 +54,17 @@ Apify.main(async () => {
 
       if (isEpisode) {
         const part = request.url.split("=")[1];
-        const partUrl = $(`#file-serial-player [part=${part}] a`).prop("href");
+        const fileUrl = $(`#file-serial-player [part=${part}] a`).prop("href");
+        const [authorNames, name] = $("h1").text().split(":");
+
+        const authors = authorNames.split(" a ").map((author) => author.trim());
 
         await Apify.pushData({
           url: request.url,
           part,
-          partUrl,
+          partUrl: fileUrl,
+          name: name.trim(),
+          authors,
         });
       }
     },
