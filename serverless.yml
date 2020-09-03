@@ -1,0 +1,82 @@
+service:
+  name: rozhlas-archiv-publisher
+
+custom:
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'eu-central-1'}
+  newEpisodeTopicName: NewRozhlasEpisodes
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: ${self:custom.stage}
+  region: ${self:custom.region}
+
+package:
+  exclude:
+    - apify/**
+    - adapters/**
+
+plugins:
+  - serverless-pseudo-parameters
+  
+functions:
+  episode-sns-publish:
+    handler: publish.handler
+    environment: 
+      NewEpisodesTopicARN: 
+        Ref: NewEpisodesTopic
+    role: PublisherRole
+    events:
+      - http:
+          path: new-episodes
+          method: post
+
+resources:
+  Resources:
+    NewEpisodesTopic:
+      Type: AWS::SNS::Topic
+      Properties:
+        TopicName: ${self:custom.newEpisodeTopicName}
+    PublisherRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /rozhlas-archive/
+        RoleName: PublisherRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: snsLambdaRole
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: 
+                    - arn:aws:logs:#{AWS::Region}:#{AWS::AccountId}:log-group:/aws/lambda/*:*:*
+                - Effect: Allow
+                  Action:
+                    - sns:Publish
+                  Resource: 
+                    - Ref: NewEpisodesTopic
+
+  Outputs:
+    NewEpisodesARN:
+      Value:
+        Ref: NewEpisodesTopic
+      Export:
+        Name: ${self:custom.stage}-NewEpisodesARN
+    NewEpisodesTopic:
+      Value:
+        Fn::GetAtt: NewEpisodesTopic.TopicName
+      Export:
+        Name: ${self:custom.stage}-NewEpisodesTopic
