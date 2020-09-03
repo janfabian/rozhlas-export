@@ -2,7 +2,6 @@ const superagent = require("superagent");
 const cookie = require("cookie");
 const crypto = require("crypto");
 const https = require("https");
-const fs = require("fs");
 
 const shared = {
   context: {
@@ -87,7 +86,7 @@ module.exports.uploadSong = async (readstream, filename, id3) => {
 
   const uploadHeaders = prepareHeaders();
 
-  const status = await new Promise((resolve) => {
+  const status = await new Promise((resolve, reject) => {
     const req = https.request(
       uploadUrl,
       {
@@ -99,8 +98,12 @@ module.exports.uploadSong = async (readstream, filename, id3) => {
           "X-Goog-Upload-Offset": "0",
         },
       },
-      function (res) {
-        resolve(res.statusCode);
+      (res) => {
+        if (res.statusCode === 200) {
+          resolve();
+        } else {
+          reject(new Error(`${res.statusCode}`));
+        }
       }
     );
     req.write(id3);
