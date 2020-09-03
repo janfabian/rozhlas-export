@@ -1,6 +1,8 @@
 const superagent = require("superagent");
 const cookie = require("cookie");
 const crypto = require("crypto");
+const https = require("https");
+const fs = require("fs");
 
 const shared = {
   context: {
@@ -58,7 +60,7 @@ module.exports.createPlaylist = async (albumName) => {
   return body.playlistId;
 };
 
-module.exports.uploadSong = async (filepath, filename, id3) => {
+module.exports.uploadSong = async (readstream, filename, id3) => {
   const getUploadLinkHeaders = {
     Accept: "*/*",
     "Accept-Language": "en-US,en;q=0.5",
@@ -85,15 +87,25 @@ module.exports.uploadSong = async (filepath, filename, id3) => {
 
   const uploadHeaders = prepareHeaders();
 
-  const { status } = await superagent
-    .post(uploadUrl)
-    .type("form")
-    .set({
-      ...uploadHeaders,
-      "X-Goog-Upload-Command": "upload, finalize",
-      "X-Goog-Upload-Offset": "0",
-    })
-    .attach("data", filepath);
+  const status = await new Promise((resolve) => {
+    const req = https.request(
+      uploadUrl,
+      {
+        method: "POST",
+        headers: {
+          ...uploadHeaders,
+          "content-type": "application/x-www-form-urlencoded;charset=utf-8",
+          "X-Goog-Upload-Command": "upload, finalize",
+          "X-Goog-Upload-Offset": "0",
+        },
+      },
+      function (res) {
+        resolve(res.statusCode);
+      }
+    );
+    req.write(id3);
+    readstream.pipe(req);
+  });
 
   return { status };
 };

@@ -23,6 +23,7 @@ plugins:
 functions:
   episode-sns-publish:
     handler: publish.handler
+    memorySize: 256
     environment: 
       NewEpisodesTopicARN: 
         Ref: NewEpisodesTopic
