@@ -99,8 +99,12 @@ module.exports.uploadSong = async (readstream, filename, id3) => {
         },
       },
       (res) => {
+        console.log({
+          filename,
+          status: res.statusCode,
+        });
         if (res.statusCode === 200) {
-          resolve();
+          resolve(res.statusCode);
         } else {
           reject(new Error(`${res.statusCode}: ${res.statusMessage}`));
         }
