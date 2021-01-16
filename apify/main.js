@@ -14,7 +14,7 @@ Apify.main(async () => {
       u.searchParams.append("porad[]", category);
 
       if (last24hours) {
-        u.searchParams.append("dateLimit", "TL_1D");
+        u.searchParams.append("dateLimit", "1D");
       }
 
       return requestQueue.addRequest({
