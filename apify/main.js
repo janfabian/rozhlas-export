@@ -50,6 +50,26 @@ Apify.main(async () => {
             })
           )
         );
+
+        const url = new URL(request.url);
+        if (url.searchParams.get("offset") === "0") {
+          const categoryUrls = [];
+          $("#box-listovani #column-2 a").each((index) => {
+            url.searchParams.set("offset", (index + 1) * 10);
+            categoryUrls.push(url.toString());
+          });
+
+          await Promise.all(
+            categoryUrls.map((url) =>
+              requestQueue.addRequest({
+                url,
+                userData: { isCategory: true, category },
+              })
+            )
+          );
+        }
+
+        return;
       }
 
       if (isEpisode) {
